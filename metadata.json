@@ -1,0 +1,8 @@
+{
+  "name": "Colorbit",
+  "description": "Полная копия симулятора майнинга colorbit.ru с сюжетом из 7 глав, ДомКлик, Авинто, банком и разгоном для белых списков",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
