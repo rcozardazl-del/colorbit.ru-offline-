@@ -1,0 +1,1 @@
+import{b as e,U as o}from"./app-6658f0c3.js";import{R as i}from"./vendor-227f998d.js";const m=i.memo(function({on:a,className:t,children:s}){return e("div",{className:t,children:e(o,{show:a,leave:"transition ease-in duration-1000","leave-from-class":"opacity-100",leaveTo:"opacity-0",children:e("div",{className:"text-sm text-gray-300",children:s})})})});export{m as default};

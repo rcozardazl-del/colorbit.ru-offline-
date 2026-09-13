@@ -73,6 +73,7 @@ import com.example.ui.ColorbitViewModel
 import com.example.ui.GameTab
 import com.example.ui.screens.ExchangeScreen
 import com.example.ui.screens.FacilitiesScreen
+import com.example.ui.screens.OfflineWebScreen
 import com.example.ui.screens.OnlineWebViewScreen
 import com.example.ui.screens.QuestsScreen
 import com.example.ui.screens.RigsScreen
@@ -107,6 +108,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ColorbitApp(vm: ColorbitViewModel = viewModel()) {
     var isOnlineMode by remember { mutableStateOf(false) }
+    var isOfflineWebMode by remember { mutableStateOf(false) }
 
     val selectedTab by vm.selectedTab.collectAsState()
     val stats by vm.playerStats.collectAsState()
@@ -134,7 +136,17 @@ fun ColorbitApp(vm: ColorbitViewModel = viewModel()) {
 
     if (isOnlineMode) {
         OnlineWebViewScreen(
-            onSwitchToOffline = { isOnlineMode = false }
+            onSwitchToOffline = { isOnlineMode = false },
+            onOpenOfflineWeb = {
+                isOnlineMode = false
+                isOfflineWebMode = true
+            }
+        )
+    } else if (isOfflineWebMode) {
+        OfflineWebScreen(
+            initialShopSlug = "dhs",
+            onClose = { isOfflineWebMode = false },
+            onOpenNativeAvito = { isOfflineWebMode = false }
         )
     } else {
         Scaffold(
@@ -174,10 +186,10 @@ fun ColorbitApp(vm: ColorbitViewModel = viewModel()) {
                                     .clip(RoundedCornerShape(4.dp))
                                     .background(NeonGreen.copy(alpha = 0.18f))
                                     .border(1.dp, NeonGreen.copy(alpha = 0.35f), RoundedCornerShape(4.dp))
-                                    .clickable { isOnlineMode = true }
+                                    .clickable { isOfflineWebMode = true }
                                     .padding(horizontal = 5.dp, vertical = 2.dp)
                             ) {
-                                Text("ОФЛАЙН", color = NeonGreen, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                                Text("HTML ОФЛАЙН", color = NeonGreen, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                             }
                             Spacer(modifier = Modifier.width(5.dp))
                             val diffColor = when (stats.difficulty) {

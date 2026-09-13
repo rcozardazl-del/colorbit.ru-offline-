@@ -1,0 +1,1 @@
+import{b as a,c as s}from"./app-6658f0c3.js";import{R as n}from"./vendor-227f998d.js";const r=n.memo(function({children:e,...t}){return a("button",{...t,className:s("inline-flex items-center px-4 py-2 rounded-smx font-semibold text-xs uppercase tracking-widest focus:outline-none app-bg-light text-app-black",t.className),children:e})});export{r as default};

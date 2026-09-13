@@ -1,0 +1,1 @@
+import{b as e}from"./app-6658f0c3.js";import{R as r}from"./vendor-227f998d.js";const m=r.memo(({onClick:t})=>e("button",{onClick:t,className:"w-full h-11 my-3 mb-4 px-7 font-bold uppercase tracking-widest text-base rounded-md bg-gray-300/[0.8] hover:bg-gray-300/[0.9] text-app-black",children:"Создать"}));export{m as CreateButton};

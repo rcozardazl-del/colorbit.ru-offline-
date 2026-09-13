@@ -1,0 +1,1 @@
+import{b as t}from"./app-6658f0c3.js";import{r as a}from"./vendor-227f998d.js";const e=a.memo(({image:o,size:r=9})=>t("img",{className:`h-${r} w-${r} rounded-full object-cover`,src:o,alt:""}));export{e as A};

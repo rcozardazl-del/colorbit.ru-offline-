@@ -1,0 +1,1 @@
+import{b as o,t as e}from"./app-6658f0c3.js";import{R as s}from"./vendor-227f998d.js";const t=r=>o("input",{...r,className:e("app-bg border border-gray-500 rounded-md focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-0 text-app",r.className)}),m=s.memo(t);export{m as I};

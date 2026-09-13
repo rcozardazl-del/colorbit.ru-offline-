@@ -1,0 +1,1 @@
+const e=[{title:"USD",value:"USD"},{title:"ETH",value:"ETH"},{title:"BTC",value:"BTC"},{title:"LTC",value:"LTC"},{title:"DOGE",value:"DOGE"},{title:"COLOR",value:"CLR"}],t={USD:1,BTC:5e4,ETH:2900,LTC:70,DOGE:.09,CLR:20};export{t as a,e as c};

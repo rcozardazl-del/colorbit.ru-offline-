@@ -1,0 +1,1 @@
+import{b as e}from"./app-6658f0c3.js";import{R as r}from"./vendor-227f998d.js";const n=r.memo(({onClick:t})=>e("button",{onClick:t,className:"inline-flex items-center px-4 py-2 rounded-smx font-bold text-xs uppercase tracking-widest bg-gray-300/[0.8] hover:bg-gray-300/[0.9] text-app-black",children:"Изменить"}));export{n as EditButton};

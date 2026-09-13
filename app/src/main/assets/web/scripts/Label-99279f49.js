@@ -1,0 +1,1 @@
+import{b as l,t as m}from"./app-6658f0c3.js";import{R as r}from"./vendor-227f998d.js";const b=r.memo(function({value:e,htmlFor:t,children:a,className:o}){return l("label",{className:m("block font-medium font-play text-xl",o),htmlFor:t,children:e||a})});export{b as L};

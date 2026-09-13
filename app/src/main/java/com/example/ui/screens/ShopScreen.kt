@@ -83,6 +83,7 @@ import com.example.model.PCComponent
 import com.example.model.VirtualLoan
 import com.example.ui.theme.ColorbitBorder
 import com.example.ui.theme.ColorbitCard
+import com.example.ui.theme.ColorbitLime
 import com.example.ui.theme.DarkCyberBorder
 import com.example.ui.theme.DarkCyberCard
 import com.example.ui.theme.DarkCyberCardElevated
@@ -98,7 +99,8 @@ import com.example.ui.theme.TextSecondary
 enum class ShopMarketTab(val title: String) {
     DHS("DHS (Новое)"),
     AVINTO("Авито P2P"),
-    LOANS("СберБит Банк"),
+    WEB_SOURCE("HTML Магазины"),
+    LOANS("Банк"),
     LEADERBOARD("Топ P2P")
 }
 
@@ -152,6 +154,7 @@ fun ShopScreen(
                 val tabColor = when (tab) {
                     ShopMarketTab.DHS -> NeonGreen
                     ShopMarketTab.AVINTO -> NeonOrange
+                    ShopMarketTab.WEB_SOURCE -> ColorbitLime
                     ShopMarketTab.LOANS -> NeonCyan
                     ShopMarketTab.LEADERBOARD -> Color(0xFFFFD700)
                 }
@@ -214,6 +217,14 @@ fun ShopScreen(
                     selectedCategory = selectedCategory,
                     onSelectCategory = { selectedCategory = it },
                     onSelectToBuy = { componentToInstallDHS = it }
+                )
+            }
+            ShopMarketTab.WEB_SOURCE -> {
+                // ОФЛАЙН ВЕБ-РЕЖИМ (ПОДЛИННЫЙ HTML + JS COLORBIT)
+                OfflineWebScreen(
+                    initialShopSlug = "dhs",
+                    onClose = { selectedMarket = ShopMarketTab.AVINTO },
+                    onOpenNativeAvito = { selectedMarket = ShopMarketTab.AVINTO }
                 )
             }
             ShopMarketTab.LOANS -> {

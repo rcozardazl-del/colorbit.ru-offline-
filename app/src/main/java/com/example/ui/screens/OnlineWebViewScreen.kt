@@ -84,7 +84,8 @@ import kotlinx.coroutines.launch
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun OnlineWebViewScreen(
-    onSwitchToOffline: () -> Unit
+    onSwitchToOffline: () -> Unit,
+    onOpenOfflineWeb: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -248,6 +249,25 @@ fun OnlineWebViewScreen(
                             contentDescription = "Обновить",
                             tint = NeonCyan,
                             modifier = Modifier.size(17.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    // Кнопка перехода в скачанный офлайн HTML+JS режим
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color(0xFF333333))
+                            .border(1.dp, NeonGreen.copy(alpha = 0.6f), RoundedCornerShape(6.dp))
+                            .clickable { onOpenOfflineWeb() }
+                            .padding(horizontal = 7.dp, vertical = 5.dp)
+                    ) {
+                        Text(
+                            "HTML Офлайн",
+                            color = NeonGreen,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
                         )
                     }
 

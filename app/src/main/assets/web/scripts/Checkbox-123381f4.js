@@ -1,0 +1,1 @@
+import{b as e}from"./app-6658f0c3.js";import{R as r}from"./vendor-227f998d.js";const n=r.memo(function(o){return e("input",{type:"checkbox",...o,className:"rounded app-bg border-gray-500 text-red-600 shadow-sm focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-0 outline-none"})});export{n as default};

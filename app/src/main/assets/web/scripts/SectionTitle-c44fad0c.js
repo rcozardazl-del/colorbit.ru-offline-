@@ -1,0 +1,1 @@
+import{j as s,b as t}from"./app-6658f0c3.js";import{R as a}from"./vendor-227f998d.js";const o=a.memo(({title:e,description:m})=>s("div",{className:"px-5 md:pl-7 pt-5 md:pt-10",children:[t("h3",{className:"text-3xl font-medium font-play",children:e}),t("p",{className:"mt-1 text-md text-gray-400",children:m})]}));export{o as SectionTitle};

@@ -1,0 +1,1 @@
+import{b as o}from"./app-6658f0c3.js";import{R as e}from"./vendor-227f998d.js";const s=e.memo(function({message:r,className:n,children:t}){return!r&&!t?null:o("div",{className:n,children:o("p",{className:"text-sm text-red-600",children:r||t})})});export{s as I};

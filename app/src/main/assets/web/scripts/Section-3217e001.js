@@ -1,0 +1,1 @@
+import{b as e,t as o}from"./app-6658f0c3.js";import{R as r}from"./vendor-227f998d.js";const s=r.memo(({children:a,className:t=""})=>e("div",{className:o("rounded-xl app-bg-dark text-app shadow-md mb-4 px-4 py-4",t),children:a}));export{s as S};

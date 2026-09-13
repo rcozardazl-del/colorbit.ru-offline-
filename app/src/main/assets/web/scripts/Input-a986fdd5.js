@@ -1,0 +1,1 @@
+import{b as s,c as o}from"./app-6658f0c3.js";import{R as e,r as t}from"./vendor-227f998d.js";const c=t.forwardRef((r,a)=>s("input",{...r,ref:a,className:o("app-bg border-gray-500 rounded-md focus:border-red-500 focus:ring focus:ring-red-500 focus:ring-opacity-0 text-app",r.className)})),d=e.memo(c);export{d as default};

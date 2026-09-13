@@ -1,0 +1,1 @@
+import{b as t,d as e,m as a,r as s}from"./app-6658f0c3.js";import{r as i}from"./vendor-227f998d.js";const c=i.memo(({price:r,currency:o})=>t("h3",{className:e("text-2xl tracking-wide font-roboto font-bold sm:mb-2 whitespace-nowrap inline-block",s(o)),children:a(r,o)}));export{c as Price};
