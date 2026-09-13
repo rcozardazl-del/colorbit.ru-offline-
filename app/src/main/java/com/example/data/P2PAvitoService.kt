@@ -135,6 +135,19 @@ class P2PAvitoService(private val scope: CoroutineScope) {
         broadcastSeasonWipe(newSeasonNumber)
     }
 
+    fun resetPlayerSales(newDifficulty: GameDifficulty) {
+        // Досрочный сброс игрока через Настройки:
+        // Сезон НЕ меняется, обнуляются только личные лоты на продаже игрока
+        currentDifficulty = newDifficulty
+        _mySales.value = emptyList()
+        if (newDifficulty == GameDifficulty.EASY) {
+            generateBotListings()
+        } else {
+            _listings.value = realLanListings.toList()
+        }
+        recalculateLeaderboard()
+    }
+
     private fun broadcastSeasonWipe(seasonNumber: Int) {
         scope.launch(Dispatchers.IO) {
             try {

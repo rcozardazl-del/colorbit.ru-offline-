@@ -880,8 +880,10 @@ class ColorbitViewModel(application: Application) : AndroidViewModel(application
 
     fun resetGameProgress(newDifficulty: com.example.model.GameDifficulty) {
         val currentName = _playerStats.value.playerName
+        // Досрочный сброс через Настройки НЕ меняет номер сезона и таймер вайпа!
         repo.resetGameProgress(newDifficulty, currentName)
 
+        _seasonInfo.value = repo.loadSeasonInfo()
         _playerStats.value = repo.loadPlayerStats()
         _rigs.value = repo.loadRigs()
         _cryptos.value = repo.getInitialCryptos()
@@ -890,11 +892,11 @@ class ColorbitViewModel(application: Application) : AndroidViewModel(application
         _storyChapters.value = repo.loadStoryChapters()
         _loans.value = repo.loadLoans()
 
-        p2pService.wipeAllAvitoData(_seasonInfo.value.seasonNumber)
-        p2pService.setDifficulty(newDifficulty)
+        // Сбрасываем только лоты игрока, сезон и P2P-сеть не затрагиваются
+        p2pService.resetPlayerSales(newDifficulty)
         updateP2PPlayerStats()
         _needsInitialDifficultySelection.value = false
-        showNotification("Прогресс сброшен! Начата новая игра: ${newDifficulty.title}")
+        showNotification("Прогресс сброшен! Сезон ${_seasonInfo.value.seasonNumber} продолжается (${newDifficulty.title})")
     }
 
     fun performSeasonalWipe(newDifficulty: com.example.model.GameDifficulty) {

@@ -894,7 +894,7 @@ fun ColorbitApp(vm: ColorbitViewModel = viewModel()) {
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            "Внимание! Весь текущий баланс USD, криптовалюта, фермы, недвижимость и сюжетные задания будут полностью удалены. Это действие необратимо.",
+                            "Внимание! Весь текущий баланс USD, криптовалюта, фермы, недвижимость и сюжетные задания будут удалены. Текущий Сезон ${seasonInfo.seasonNumber} и таймер до глобального вайпа сохраняются без изменений.",
                             color = TextSecondary,
                             fontSize = 11.sp,
                             lineHeight = 15.sp
