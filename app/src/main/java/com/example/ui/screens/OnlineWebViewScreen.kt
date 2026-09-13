@@ -24,8 +24,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,8 +33,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.Button
@@ -75,14 +73,9 @@ import com.example.ui.theme.ColorbitBorder
 import com.example.ui.theme.ColorbitCard
 import com.example.ui.theme.ColorbitLime
 import com.example.ui.theme.ColorbitOrange
-import com.example.ui.theme.DarkCyberBackground
-import com.example.ui.theme.DarkCyberBorder
-import com.example.ui.theme.DarkCyberCard
-import com.example.ui.theme.DarkCyberCardElevated
 import com.example.ui.theme.HeatRed
 import com.example.ui.theme.NeonCyan
 import com.example.ui.theme.NeonGreen
-import com.example.ui.theme.NeonOrange
 import com.example.ui.theme.TextMuted
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
@@ -103,7 +96,7 @@ fun OnlineWebViewScreen(
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
     var showDownloaderSheet by remember { mutableStateOf(false) }
 
-    // Автоматический старт скачивания разметки и JS при первом заходе в онлайн режим
+    // Автоматический старт скачивания разметки и JS при заходе в онлайн режим (Android 10 Scoped Storage Safe)
     LaunchedEffect(Unit) {
         if (!downloadProgress.isDownloading && downloadProgress.totalFiles == 0) {
             ColorbitDownloader.downloadAllSiteAndShops(context)
@@ -116,7 +109,7 @@ fun OnlineWebViewScreen(
             .background(ColorbitBg)
             .testTag("online_webview_container")
     ) {
-        // Главный WebView контейнер
+        // Главный WebView
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { ctx ->
@@ -166,12 +159,12 @@ fun OnlineWebViewScreen(
             }
         )
 
-        // Верхняя панель управления с переходом по магазинам и кнопкой загрузчика
+        // Верхняя панель управления с переходом по магазинам и загрузчиком
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter)
-                .background(Color(0xFF1E1E1E).copy(alpha = 0.95f))
+                .background(Color(0xFF1E1E1E).copy(alpha = 0.96f))
                 .border(1.dp, ColorbitBorder)
                 .padding(horizontal = 10.dp, vertical = 6.dp)
         ) {
@@ -198,7 +191,7 @@ fun OnlineWebViewScreen(
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Кнопка статуса авто-скачивания сорцов/магазинов
+                    // Кнопка авто-выгрузки
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
@@ -207,7 +200,7 @@ fun OnlineWebViewScreen(
                             .clickable {
                                 if (!downloadProgress.isDownloading) {
                                     coroutineScope.launch {
-                                        Toast.makeText(context, "Скачивание скриптов и магазинов начато...", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, "Скачивание в хранилище Android 10 начато...", Toast.LENGTH_SHORT).show()
                                         ColorbitDownloader.downloadAllSiteAndShops(context)
                                     }
                                 }
@@ -232,7 +225,7 @@ fun OnlineWebViewScreen(
                             }
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                if (downloadProgress.isDownloading) "Качаю..." else "Скачать код",
+                                if (downloadProgress.isDownloading) "Качаю..." else "Архив сайта",
                                 color = if (downloadProgress.isDownloading) ColorbitOrange else TextPrimary,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.SemiBold
@@ -317,8 +310,8 @@ fun OnlineWebViewScreen(
                 }
             }
 
-            // Строка 3: Индикатор процесса скачивания скриптов в Загрузки
-            if (downloadProgress.isDownloading || showDownloaderSheet) {
+            // Строка 3: Индикатор процесса выгрузки и кнопка экспорта ZIP (Android 10 Safe)
+            if (downloadProgress.isDownloading || showDownloaderSheet || downloadProgress.completedFiles > 0) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -332,17 +325,40 @@ fun OnlineWebViewScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                "Пакетная выгрузка JS & HTML в /Downloads",
-                                color = NeonGreen,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                "${downloadProgress.completedFiles}/${downloadProgress.totalFiles}",
-                                color = TextMuted,
-                                fontSize = 10.sp
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Folder, contentDescription = null, tint = NeonGreen, modifier = Modifier.size(13.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    "Выгрузка (Android 10 Ready)",
+                                    color = NeonGreen,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    "${downloadProgress.completedFiles}/${downloadProgress.totalFiles}",
+                                    color = TextMuted,
+                                    fontSize = 10.sp
+                                )
+                                if (!downloadProgress.isDownloading && downloadProgress.completedFiles > 0) {
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(NeonCyan.copy(alpha = 0.2f))
+                                            .border(1.dp, NeonCyan, RoundedCornerShape(4.dp))
+                                            .clickable { ColorbitDownloader.shareArchive(context) }
+                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(Icons.Default.Share, contentDescription = null, tint = NeonCyan, modifier = Modifier.size(10.dp))
+                                            Spacer(modifier = Modifier.width(3.dp))
+                                            Text("Поделиться ZIP", color = NeonCyan, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                }
+                            }
                         }
 
                         Spacer(modifier = Modifier.height(4.dp))
@@ -366,6 +382,15 @@ fun OnlineWebViewScreen(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
+                        if (downloadProgress.saveDirectoryPath.isNotEmpty()) {
+                            Text(
+                                "Путь: ${downloadProgress.saveDirectoryPath}",
+                                color = TextMuted,
+                                fontSize = 8.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
             }
@@ -391,7 +416,7 @@ fun OnlineWebViewScreen(
             }
         }
 
-        // Сообщение об ошибке (Белые списки или недоступность сети)
+        // Сообщение об ошибке
         if (hasError) {
             Box(
                 modifier = Modifier
@@ -439,7 +464,7 @@ fun OnlineWebViewScreen(
                         Spacer(modifier = Modifier.height(6.dp))
 
                         Text(
-                            "Сервер colorbit.ru недоступен по текущей ссылке.\nВсе скрипты и разметка магазинов уже сохраняются в папку Загрузки, а вы можете мгновенно играть в автономном офлайн-режиме!",
+                            "Сайт colorbit.ru сейчас недоступен по прямой ссылке.\nВсе данные и магазины безопасно сохраняются в хранилище Android 10, а вы можете мгновенно играть офлайн!",
                             color = TextSecondary,
                             fontSize = 12.sp,
                             textAlign = TextAlign.Center,

@@ -1,17 +1,22 @@
 package com.example.data
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.util.Log
+import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 data class DownloadProgress(
     val isDownloading: Boolean = false,
@@ -21,6 +26,7 @@ data class DownloadProgress(
     val downloadedBytes: Long = 0,
     val statusMessage: String = "Готов к скачиванию",
     val saveDirectoryPath: String = "",
+    val isScopedStorageFallback: Boolean = false,
     val lastDownloadedFiles: List<String> = emptyList()
 )
 
@@ -35,7 +41,7 @@ object ColorbitDownloader {
     private const val TAG = "ColorbitDownloader"
     private const val BASE_URL = "https://colorbit.ru"
 
-    // Все подтверждённые маршруты магазинов и разделов на сайте Colorbit.ru
+    // Все подтверждённые маршруты магазинов на сайте Colorbit.ru
     val KNOWN_SHOPS = listOf(
         ColorbitShopLink("DHS (DNS)", "dhs", "$BASE_URL/shops/dhs", "Магазин новых комплектующих (293+ товаров)"),
         ColorbitShopLink("Aliexprezz", "aliexprezz", "$BASE_URL/shops/aliexprezz", "Магазин из Китая с доставкой (118+ товаров)"),
@@ -51,17 +57,38 @@ object ColorbitDownloader {
     private val _progress = MutableStateFlow(DownloadProgress())
     val progress = _progress.asStateFlow()
 
-    fun getExportFolder(context: Context): File {
-        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        val targetFolder = File(downloadsDir, "Colorbit_Full_Archive")
-        if (!targetFolder.exists()) {
+    /**
+     * Возвращает доступную директорию для Android 10 (API 29) и новее:
+     * 1. Сначала пробует публичный Downloads/Colorbit_Full_Archive (благодаря requestLegacyExternalStorage)
+     * 2. Если в Android 10 включена строгая изоляция без разрешений — использует надежную внешнюю папку приложения context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), куда запись разрешена ВСЕГДА на 100% без каких-либо диалогов разрешений!
+     */
+    fun getTargetDirectory(context: Context): File {
+        return try {
+            val publicDownloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            val publicTarget = File(publicDownloads, "Colorbit_Full_Archive")
+            if (!publicTarget.exists()) {
+                val created = publicTarget.mkdirs()
+                if (created || publicTarget.canWrite()) {
+                    return publicTarget
+                }
+            } else if (publicTarget.canWrite()) {
+                return publicTarget
+            }
+            // Резервный путь для Android 10 Scoped Storage (работает без единого разрешения)
+            val appDownloads = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: context.filesDir
+            val targetFolder = File(appDownloads, "Colorbit_Full_Archive")
             targetFolder.mkdirs()
+            targetFolder
+        } catch (e: Exception) {
+            val appDownloads = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: context.filesDir
+            val targetFolder = File(appDownloads, "Colorbit_Full_Archive")
+            targetFolder.mkdirs()
+            targetFolder
         }
-        return targetFolder
     }
 
     suspend fun downloadAllSiteAndShops(context: Context) = withContext(Dispatchers.IO) {
-        val targetDir = getExportFolder(context)
+        val targetDir = getTargetDirectory(context)
         val jsDir = File(targetDir, "scripts").apply { mkdirs() }
         val cssDir = File(targetDir, "styles").apply { mkdirs() }
         val htmlDir = File(targetDir, "pages").apply { mkdirs() }
@@ -69,7 +96,7 @@ object ColorbitDownloader {
 
         _progress.value = DownloadProgress(
             isDownloading = true,
-            statusMessage = "Анализ colorbit.ru и поиск скриптов...",
+            statusMessage = "Анализ colorbit.ru и поиск скриптов (Android 10)...",
             saveDirectoryPath = targetDir.absolutePath
         )
 
@@ -77,7 +104,7 @@ object ColorbitDownloader {
         var totalBytes = 0L
 
         try {
-            // 1. Скачиваем главную страницу
+            // 1. Главная страница
             _progress.value = _progress.value.copy(
                 currentUrl = BASE_URL,
                 statusMessage = "Скачивание главной страницы index.html..."
@@ -90,11 +117,11 @@ object ColorbitDownloader {
                 totalBytes += homeHtml.length
             }
 
-            // 2. Ищем и качаем CSS и основные JS скрипты
+            // 2. Сбор ссылок на CSS и JS
             val cssUrls = extractRegexUrls(homeHtml ?: "", "href=[\"']([^\"']+\\.css[^\"']*)[\"']")
             val jsUrls = extractRegexUrls(homeHtml ?: "", "src=[\"']([^\"']+\\.js[^\"']*)[\"']")
 
-            // Дополнительно гарантированные главные бандлы Colorbit
+            // Главные модули Vue/Inertia Colorbit
             val allJsUrls = (jsUrls + listOf(
                 "$BASE_URL/build/assets/app-6658f0c3.js",
                 "$BASE_URL/build/assets/vendor-227f998d.js",
@@ -161,32 +188,35 @@ object ColorbitDownloader {
                 }
             }
 
-            // Создаем информационный README
+            // Информационный README
             val readmeFile = File(targetDir, "README_COLORBIT.txt")
             readmeFile.writeText(
                 """
-                АРХИВ СОРЦОВ И МАГАЗИНОВ COLORBIT.RU
-                Дата выгрузки: 2026-09-13
+                АРХИВ СОРЦОВ И МАГАЗИНОВ COLORBIT.RU (ANDROID 10 COMPATIBLE)
                 
                 Скачанные магазины:
                 ${KNOWN_SHOPS.joinToString("\n") { "- ${it.name}: ${it.slug}.html (${it.fullUrl})" }}
                 
                 Папки архива:
-                - /scripts: Все скомпилированные Vue/Inertia/React JS бандлы (app, vendor, RigItem, GPUSlots, RigSlot, Overclock)
-                - /styles: CSS стили Tailwind и темы оформления Colorbit (#2B2B2B, #121212, #8000d7)
-                - /shops: HTML разметки страниц всех 7 магазинов (DHS, Aliexprezz, SoftPortal, Гертруда, OnlyFans, ДомКлик, Avinto)
-                - /pages: Игровые страницы фермы, локаций, рейтинга и FAQ.
+                - /scripts: Vue/Inertia/React JS бандлы
+                - /styles: CSS стили темы оформления Colorbit (#2B2B2B, #121212)
+                - /shops: HTML разметки страниц всех 7 магазинов
+                - /pages: Игровые страницы
                 
                 Всего файлов сохранено: ${downloadedFiles.size}
                 Общий объем: ${totalBytes / 1024} KB
                 """.trimIndent()
             )
 
+            // Также упаковываем весь архив в единый colorbit_dump.zip для легкого открытия/пересылки
+            val zipFile = File(targetDir, "colorbit_dump.zip")
+            zipDirectory(targetDir, zipFile)
+
             _progress.value = _progress.value.copy(
                 isDownloading = false,
                 completedFiles = urlsToDownload.size,
                 downloadedBytes = totalBytes,
-                statusMessage = "Успешно скачано ${downloadedFiles.size} файлов в папку Загрузки!",
+                statusMessage = "Успешно скачано ${downloadedFiles.size} файлов! Сохранено в ${targetDir.name}",
                 lastDownloadedFiles = downloadedFiles.takeLast(15)
             )
 
@@ -199,6 +229,53 @@ object ColorbitDownloader {
         }
     }
 
+    /**
+     * Позволяет поделиться скачанным ZIP-архивом или открыть его через проводник / Telegram / Google Drive
+     */
+    fun shareArchive(context: Context) {
+        val targetDir = getTargetDirectory(context)
+        val zipFile = File(targetDir, "colorbit_dump.zip")
+        if (zipFile.exists()) {
+            try {
+                val uri: Uri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.provider",
+                    zipFile
+                )
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "application/zip"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(Intent.createChooser(intent, "Поделиться дампом Colorbit"))
+            } catch (e: Exception) {
+                Log.e(TAG, "Share error", e)
+            }
+        }
+    }
+
+    private fun zipDirectory(sourceDir: File, outputZipFile: File) {
+        try {
+            val fos = FileOutputStream(outputZipFile)
+            val zos = ZipOutputStream(fos)
+            val baseLength = sourceDir.absolutePath.length + 1
+
+            sourceDir.walkTopDown().forEach { file ->
+                if (file.isFile && file.name != outputZipFile.name) {
+                    val relativePath = file.absolutePath.substring(baseLength)
+                    val entry = ZipEntry(relativePath)
+                    zos.putNextEntry(entry)
+                    file.inputStream().use { input -> input.copyTo(zos) }
+                    zos.closeEntry()
+                }
+            }
+            zos.close()
+            fos.close()
+        } catch (e: Exception) {
+            Log.e(TAG, "Zip error", e)
+        }
+    }
+
     private fun fetchUrl(urlString: String): String? {
         return try {
             val url = URL(urlString)
@@ -206,7 +283,7 @@ object ColorbitDownloader {
             conn.requestMethod = "GET"
             conn.connectTimeout = 8000
             conn.readTimeout = 8000
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Android; Mobile; ColorbitDownloader)")
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Android 10; Mobile; ColorbitDownloader)")
             if (conn.responseCode == 200) {
                 conn.inputStream.bufferedReader().use { it.readText() }
             } else null
@@ -221,7 +298,7 @@ object ColorbitDownloader {
         conn.requestMethod = "GET"
         conn.connectTimeout = 8000
         conn.readTimeout = 8000
-        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Android; Mobile; ColorbitDownloader)")
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Android 10; Mobile; ColorbitDownloader)")
         if (conn.responseCode in 200..299) {
             conn.inputStream.use { input ->
                 FileOutputStream(destinationFile).use { output ->
