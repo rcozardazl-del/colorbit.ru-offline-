@@ -8,21 +8,21 @@ import androidx.compose.ui.graphics.Color
 
 private val ColorbitDarkScheme = darkColorScheme(
     primary = NeonGreen,
-    onPrimary = Color(0xFF003915),
-    primaryContainer = Color(0xFF005322),
-    onPrimaryContainer = Color(0xFF6CF89B),
+    onPrimary = Color(0xFF121212),
+    primaryContainer = Color(0xFF2B2B2B),
+    onPrimaryContainer = NeonGreen,
     secondary = NeonCyan,
-    onSecondary = Color(0xFF00363D),
-    secondaryContainer = Color(0xFF004F58),
-    onSecondaryContainer = Color(0xFF97F0FF),
+    onSecondary = Color(0xFF121212),
+    secondaryContainer = Color(0xFF333333),
+    onSecondaryContainer = NeonCyan,
     tertiary = NeonOrange,
-    background = DarkCyberBg,
+    background = ColorbitBg,
     onBackground = TextPrimary,
-    surface = DarkCyberCard,
+    surface = ColorbitCard,
     onSurface = TextPrimary,
-    surfaceVariant = DarkCyberCardElevated,
+    surfaceVariant = ColorbitCardElevated,
     onSurfaceVariant = TextSecondary,
-    outline = DarkCyberBorder
+    outline = ColorbitBorder
 )
 
 @Composable

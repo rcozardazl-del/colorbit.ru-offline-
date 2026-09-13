@@ -57,6 +57,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.model.CryptoCurrency
 import com.example.model.MiningRig
+import com.example.ui.theme.ColorbitBorder
+import com.example.ui.theme.ColorbitCard
+import com.example.ui.theme.ColorbitLime
+import com.example.ui.theme.ColorbitOrange
 import com.example.ui.theme.DarkCyberBorder
 import com.example.ui.theme.DarkCyberCard
 import com.example.ui.theme.DarkCyberCardElevated
@@ -90,21 +94,21 @@ fun RigsScreen(
         modifier = Modifier
             .fillMaxSize()
             .testTag("rigs_screen_list"),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        contentPadding = PaddingValues(14.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // Общая сводка фермы
+        // Общая сводка фермы в стиле панели Colorbit (app-bg, #2B2B2B)
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = DarkCyberCardElevated),
-                shape = RoundedCornerShape(16.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, NeonGreen.copy(alpha = 0.5f))
+                colors = CardDefaults.cardColors(containerColor = ColorbitCard),
+                shape = RoundedCornerShape(10.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, ColorbitBorder)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(14.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -132,7 +136,7 @@ fun RigsScreen(
                     Button(
                         onClick = { showAddRigDialog = true },
                         colors = ButtonDefaults.buttonColors(containerColor = NeonGreen),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.testTag("add_new_rig_btn")
                     ) {
                         Icon(Icons.Default.Add, contentDescription = null, tint = Color.Black)
@@ -241,15 +245,15 @@ private fun RigItemCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("rig_card_${rig.id}"),
-        colors = CardDefaults.cardColors(containerColor = DarkCyberCard),
-        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = ColorbitCard),
+        shape = RoundedCornerShape(10.dp),
         border = androidx.compose.foundation.BorderStroke(
             1.dp,
-            if (rig.isOverheated) HeatRed else if (rig.isPoweredOn) NeonCyan.copy(alpha = 0.4f) else DarkCyberBorder
+            if (rig.isOverheated) HeatRed else if (rig.isPoweredOn) ColorbitLime else ColorbitBorder
         )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // Верхняя шапка рига
+        Column(modifier = Modifier.padding(14.dp)) {
+            // Верхняя шапка рига в стилистике Colorbit (rigs-list__item)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -258,7 +262,7 @@ private fun RigItemCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(10.dp)
+                            .size(9.dp)
                             .clip(CircleShape)
                             .background(
                                 if (!rig.isPoweredOn) TextMuted
@@ -302,14 +306,14 @@ private fun RigItemCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // Показатели: Хэшрейт, Ватты, Температура
+            // Показатели: Хэшрейт, Ватты, Температура (стиль плашки stats в Colorbit)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(DarkCyberCardElevated, RoundedCornerShape(12.dp))
-                    .padding(12.dp),
+                    .background(Color(0xFF212121), RoundedCornerShape(8.dp))
+                    .padding(10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
@@ -317,7 +321,7 @@ private fun RigItemCard(
                     Text(
                         "%.1f MH/s".format(rig.totalHashRateMh),
                         color = if (rig.isPoweredOn) NeonGreen else TextMuted,
-                        fontSize = 16.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -327,7 +331,7 @@ private fun RigItemCard(
                     Text(
                         "${rig.totalPowerWatts}W / ${rig.psuCapacityWatts}W",
                         color = if (rig.isPsuOverloaded) HeatRed else TextPrimary,
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -343,7 +347,7 @@ private fun RigItemCard(
                                 rig.isWarningTemp -> NeonOrange
                                 else -> NeonCyan
                             },
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(15.dp)
                         )
                         Text(
                             "%.1f°C".format(rig.currentTemperatureC),
@@ -352,7 +356,7 @@ private fun RigItemCard(
                                 rig.isWarningTemp -> NeonOrange
                                 else -> TextPrimary
                             },
-                            fontSize = 15.sp,
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -457,7 +461,7 @@ private fun RigItemCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Кнопки обслуживания и Разгон
+            // Кнопки обслуживания и Разгон (стилистика кнопок Colorbit)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -465,7 +469,9 @@ private fun RigItemCard(
                 OutlinedButton(
                     onClick = onCleanDust,
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(10.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, ColorbitBorder)
                 ) {
                     Icon(Icons.Default.CleaningServices, contentDescription = null, modifier = Modifier.size(15.dp))
                     Spacer(modifier = Modifier.width(4.dp))
@@ -475,16 +481,18 @@ private fun RigItemCard(
                 OutlinedButton(
                     onClick = onReplacePaste,
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(10.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, ColorbitBorder)
                 ) {
                     Text("Паста ($12)", fontSize = 11.sp)
                 }
 
                 Button(
                     onClick = onOpenOverclock,
-                    colors = ButtonDefaults.buttonColors(containerColor = NeonOrange),
+                    colors = ButtonDefaults.buttonColors(containerColor = ColorbitOrange),
                     modifier = Modifier.weight(1.1f),
-                    shape = RoundedCornerShape(10.dp)
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Icon(Icons.Default.Speed, contentDescription = null, tint = Color.Black, modifier = Modifier.size(15.dp))
                     Spacer(modifier = Modifier.width(4.dp))
@@ -492,7 +500,7 @@ private fun RigItemCard(
                 }
             }
 
-            // Раскрывающийся список установленных деталей
+            // Раскрывающийся список установленных деталей (в стилистике слотов Colorbit RigSlot)
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier
@@ -503,8 +511,8 @@ private fun RigItemCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    if (isExpanded) "Скрыть комплектующие (${rig.installedComponents.size})"
-                    else "Установленные детали (${rig.installedComponents.size})",
+                    if (isExpanded) "Скрыть слоты (${rig.installedComponents.size})"
+                    else "Комплектующие и слоты (${rig.installedComponents.size})",
                     color = NeonCyan,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
@@ -528,8 +536,9 @@ private fun RigItemCard(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(DarkCyberCardElevated, RoundedCornerShape(8.dp))
-                                .padding(horizontal = 10.dp, vertical = 6.dp),
+                                .background(Color(0xFF212121), RoundedCornerShape(6.dp))
+                                .border(1.dp, ColorbitBorder.copy(alpha = 0.5f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 10.dp, vertical = 7.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -540,7 +549,7 @@ private fun RigItemCard(
                                     tint = NeonCyan,
                                     modifier = Modifier.size(16.dp)
                                 )
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Column {
                                     Text(comp.component.name, color = TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                                     Text(
@@ -551,11 +560,15 @@ private fun RigItemCard(
                                     )
                                 }
                             }
-                            Text(
-                                "%.0f%%".format(comp.durabilityPercent),
-                                color = if (comp.durabilityPercent > 70f) NeonGreen else NeonOrange,
-                                fontSize = 11.sp
-                            )
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    "%.0f%%".format(comp.durabilityPercent),
+                                    color = if (comp.durabilityPercent > 70f) NeonGreen else NeonOrange,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text("состояние", color = TextMuted, fontSize = 9.sp)
+                            }
                         }
                     }
                 }

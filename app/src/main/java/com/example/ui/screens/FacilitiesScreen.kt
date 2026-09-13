@@ -59,6 +59,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.MiningFacility
 import com.example.model.RentPeriod
+import com.example.ui.theme.ColorbitBorder
+import com.example.ui.theme.ColorbitCard
+import com.example.ui.theme.ColorbitLime
 import com.example.ui.theme.DarkCyberBorder
 import com.example.ui.theme.DarkCyberCard
 import com.example.ui.theme.DarkCyberCardElevated
@@ -93,23 +96,23 @@ fun FacilitiesScreen(
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = DarkCyberCardElevated),
-                border = BorderStroke(1.dp, NeonOrange.copy(alpha = 0.6f))
+                shape = RoundedCornerShape(10.dp),
+                colors = CardDefaults.cardColors(containerColor = ColorbitCard),
+                border = BorderStroke(1.dp, ColorbitBorder)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(14.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(42.dp)
-                                .background(NeonOrange.copy(alpha = 0.15f), RoundedCornerShape(12.dp)),
+                                .size(40.dp)
+                                .background(Color(0xFF212121), RoundedCornerShape(8.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 Icons.Default.LocationCity,
                                 contentDescription = null,
                                 tint = NeonOrange,
-                                modifier = Modifier.size(26.dp)
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(12.dp))
@@ -119,16 +122,16 @@ fun FacilitiesScreen(
                                     "ДомКлик — Недвижимость",
                                     color = TextPrimary,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 17.sp
+                                    fontSize = 16.sp
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(4.dp))
                                         .background(NeonGreen.copy(alpha = 0.2f))
-                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                        .padding(horizontal = 5.dp, vertical = 2.dp)
                                 ) {
-                                    Text("COLORBIT", color = NeonGreen, fontSize = 9.sp, fontWeight = FontWeight.Black)
+                                    Text("COLORBIT", color = NeonGreen, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                                 }
                             }
                             Text(
@@ -241,14 +244,14 @@ private fun FacilityCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("facility_card_${facility.id}"),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = DarkCyberCard),
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(containerColor = ColorbitCard),
         border = BorderStroke(
             1.dp,
             when {
-                facility.isActiveLocation -> NeonGreen
-                facility.isUnlocked -> NeonCyan.copy(alpha = 0.5f)
-                else -> DarkCyberBorder
+                facility.isActiveLocation -> ColorbitLime
+                facility.isUnlocked -> ColorbitBorder
+                else -> ColorbitBorder.copy(alpha = 0.5f)
             }
         )
     ) {

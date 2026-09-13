@@ -78,6 +78,8 @@ import com.example.ui.screens.QuestsScreen
 import com.example.ui.screens.RigsScreen
 import com.example.ui.screens.ShopScreen
 import com.example.ui.screens.StoryDialogueDialog
+import com.example.ui.theme.ColorbitBorder
+import com.example.ui.theme.ColorbitCard
 import com.example.ui.theme.DarkCyberBorder
 import com.example.ui.theme.DarkCyberCard
 import com.example.ui.theme.DarkCyberCardElevated
@@ -138,13 +140,13 @@ fun ColorbitApp(vm: ColorbitViewModel = viewModel()) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                // Верхняя панель: Название + баланс наличных в USD + переключатель режима
+                // Верхняя панель: Название + баланс наличных в USD + переключатель режима (Colorbit web header)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .windowInsetsPadding(WindowInsets.statusBars)
-                        .background(DarkCyberCardElevated)
-                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                        .background(Color(0xFF1E1E1E))
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -154,25 +156,26 @@ fun ColorbitApp(vm: ColorbitViewModel = viewModel()) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 "COLOR",
-                                color = NeonCyan,
-                                fontSize = 19.sp,
+                                color = Color.White,
+                                fontSize = 18.sp,
                                 fontWeight = FontWeight.Black,
-                                letterSpacing = 1.sp
+                                letterSpacing = 0.5.sp
                             )
                             Text(
                                 "BIT",
                                 color = NeonGreen,
-                                fontSize = 19.sp,
+                                fontSize = 18.sp,
                                 fontWeight = FontWeight.Black,
-                                letterSpacing = 1.sp
+                                letterSpacing = 0.5.sp
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(NeonGreen.copy(alpha = 0.2f))
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(NeonGreen.copy(alpha = 0.18f))
+                                    .border(1.dp, NeonGreen.copy(alpha = 0.35f), RoundedCornerShape(4.dp))
                                     .clickable { isOnlineMode = true }
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    .padding(horizontal = 5.dp, vertical = 2.dp)
                             ) {
                                 Text("ОФЛАЙН", color = NeonGreen, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                             }
@@ -184,18 +187,18 @@ fun ColorbitApp(vm: ColorbitViewModel = viewModel()) {
                             }
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(diffColor.copy(alpha = 0.18f))
-                                    .border(1.dp, diffColor.copy(alpha = 0.5f), RoundedCornerShape(6.dp))
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(diffColor.copy(alpha = 0.15f))
+                                    .border(1.dp, diffColor.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
                                     .clickable { showSettingsDialog = true }
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    .padding(horizontal = 5.dp, vertical = 2.dp)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         Icons.Default.Lock,
                                         contentDescription = null,
                                         tint = diffColor,
-                                        modifier = Modifier.size(10.dp)
+                                        modifier = Modifier.size(9.dp)
                                     )
                                     Spacer(modifier = Modifier.width(3.dp))
                                     Text(
@@ -212,9 +215,9 @@ fun ColorbitApp(vm: ColorbitViewModel = viewModel()) {
                             // Кнопка перехода в онлайн colorbit.ru
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(NeonCyan.copy(alpha = 0.15f))
-                                    .border(1.dp, NeonCyan.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(Color(0xFF2B2B2B))
+                                    .border(1.dp, ColorbitBorder, RoundedCornerShape(6.dp))
                                     .clickable { isOnlineMode = true }
                                     .padding(horizontal = 8.dp, vertical = 4.dp),
                                 contentAlignment = Alignment.Center
@@ -227,41 +230,41 @@ fun ColorbitApp(vm: ColorbitViewModel = viewModel()) {
                                         modifier = Modifier.size(13.dp)
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Онлайн", color = NeonCyan, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                    Text("Онлайн", color = TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
                                 }
                             }
 
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
 
                             // Баланс USD
                             Card(
-                                colors = CardDefaults.cardColors(containerColor = DarkCyberCard),
-                                shape = RoundedCornerShape(10.dp),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, DarkCyberBorder)
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFF2B2B2B)),
+                                shape = RoundedCornerShape(6.dp),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, ColorbitBorder)
                             ) {
                                 Row(
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
                                         "$%.2f".format(stats.balanceUsd),
                                         color = if (stats.balanceUsd >= 0) NeonGreen else Color(0xFFFF5252),
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 14.sp
+                                        fontSize = 13.sp
                                     )
                                 }
                             }
 
                             Spacer(modifier = Modifier.width(6.dp))
 
-                            // Кнопка настроек и сброса
+                            // Кнопка настроек и профиля
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(DarkCyberCard)
-                                    .border(1.dp, DarkCyberBorder, RoundedCornerShape(8.dp))
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(Color(0xFF2B2B2B))
+                                    .border(1.dp, ColorbitBorder, RoundedCornerShape(6.dp))
                                     .clickable { showSettingsDialog = true }
-                                    .padding(6.dp),
+                                    .padding(5.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -280,8 +283,8 @@ fun ColorbitApp(vm: ColorbitViewModel = viewModel()) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(6.dp))
-                            .background(Color(0xFF231433))
-                            .border(1.dp, NeonPurple.copy(alpha = 0.45f), RoundedCornerShape(6.dp))
+                            .background(Color(0xFF242028))
+                            .border(1.dp, Color(0xFF8000D7).copy(alpha = 0.45f), RoundedCornerShape(6.dp))
                             .clickable { showSettingsDialog = true }
                             .padding(horizontal = 8.dp, vertical = 3.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -309,8 +312,8 @@ fun ColorbitApp(vm: ColorbitViewModel = viewModel()) {
                 // Нижняя навигация
                 NavigationBar(
                     modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars),
-                    containerColor = DarkCyberCardElevated,
-                    tonalElevation = 8.dp
+                    containerColor = Color(0xFF1E1E1E),
+                    tonalElevation = 2.dp
                 ) {
                     NavigationBarItem(
                         selected = selectedTab == GameTab.RIGS,

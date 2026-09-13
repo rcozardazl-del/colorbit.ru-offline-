@@ -2,23 +2,39 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Неоновая киберпанк/майнинг палитра Colorbit
-val NeonGreen = Color(0xFF00E676)
-val NeonGreenDark = Color(0xFF00B248)
-val NeonCyan = Color(0xFF00E5FF)
-val NeonOrange = Color(0xFFFF9100)
-val NeonPurple = Color(0xFFB388FF)
-val HeatRed = Color(0xFFFF5252)
+// Аутентичная палитра Colorbit.ru (по CSS/HTML оригиналу)
+// --app-gray: #2B2B2B, --app-dark: #121212, --app-red: #8000d7 / #CC3824
+val ColorbitBg = Color(0xFF18191C)
+val ColorbitDarkBg = Color(0xFF121212)
+val ColorbitCard = Color(0xFF2B2B2B)
+val ColorbitCardElevated = Color(0xFF333333)
+val ColorbitCardLight = Color(0xFF3A3B40)
+val ColorbitBorder = Color(0xFF3E3E44)
+val ColorbitAccentRed = Color(0xFFE53935)
+val ColorbitLime = Color(0xFF65A30D)
+val ColorbitLimeBright = Color(0xFF84CC16)
+val ColorbitOrange = Color(0xFFF59E0B)
+val ColorbitCyan = Color(0xFF38BDF8)
+val ColorbitPurple = Color(0xFF8000D7)
 
-val DarkCyberBg = Color(0xFF0A0E17)
-val DarkCyberBackground = DarkCyberBg
-val DarkCyberCard = Color(0xFF131B2E)
-val DarkCyberCardElevated = Color(0xFF1C2742)
-val DarkCyberBorder = Color(0xFF263554)
+// Для обратной совместимости с существующими ссылками
+val NeonGreen = ColorbitLimeBright
+val NeonGreenDark = ColorbitLime
+val NeonCyan = ColorbitCyan
+val NeonOrange = ColorbitOrange
+val NeonPurple = ColorbitPurple
+val HeatRed = Color(0xFFEF4444)
 
-val TextPrimary = Color(0xFFF1F5F9)
-val TextSecondary = Color(0xFF94A3B8)
-val TextMuted = Color(0xFF64748B)
+val DarkCyberBg = ColorbitBg
+val DarkCyberBackground = ColorbitBg
+val DarkCyberCard = ColorbitCard
+val DarkCyberCardElevated = ColorbitCardElevated
+val DarkCyberBorder = ColorbitBorder
+
+val TextPrimary = Color(0xFFEDEDED)
+val TextSecondary = Color(0xFFD1D5DB)
+val TextMuted = Color(0xFF9CA3AF)
 
 val EthBlue = Color(0xFF627EEA)
 val BtcGold = Color(0xFFF7931A)
+

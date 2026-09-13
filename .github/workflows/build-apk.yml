@@ -28,13 +28,39 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          cache-disabled: true
+          cache-read-only: false
 
       - name: Prepare environment and keystore
         run: |
           touch .env
           cp -n .env.example .env || true
           sed -i '/kotlin.compiler.execution.strategy/d' gradle.properties || true
+
+          # Dynamically detect hardware specs (CPU cores, RAM) to fully leverage powerful servers
+          CORES=$(nproc 2>/dev/null || echo 4)
+          RAM_KB=$(awk '/MemTotal/ {print $2}' /proc/meminfo 2>/dev/null || echo 8000000)
+          RAM_GB=$((RAM_KB / 1024 / 1024))
+          echo "Detected $CORES CPU cores and ${RAM_GB}GB RAM"
+
+          if [ "$RAM_GB" -ge 128 ]; then
+            JVM_MAX="32g"
+          elif [ "$RAM_GB" -ge 32 ]; then
+            JVM_MAX="16g"
+          elif [ "$RAM_GB" -ge 16 ]; then
+            JVM_MAX="8g"
+          else
+            JVM_MAX="4g"
+          fi
+
+          sed -i "s/-Xmx[0-9]*[a-zA-Z]*/-Xmx${JVM_MAX} -XX:+UseG1GC -XX:MaxGCPauseMillis=100/g" gradle.properties || true
+          sed -i '/org.gradle.workers.max/d' gradle.properties || true
+          echo "org.gradle.workers.max=${CORES}" >> gradle.properties
+          echo "org.gradle.parallel=true" >> gradle.properties
+          echo "org.gradle.caching=true" >> gradle.properties
+          echo "org.gradle.vfs.watch=true" >> gradle.properties
+          echo "android.enableD8.desugaring=true" >> gradle.properties
+          echo "kotlin.incremental=true" >> gradle.properties
+
           if [ -f "debug.keystore.base64" ]; then
             base64 -d debug.keystore.base64 > debug.keystore
           fi
@@ -45,7 +71,7 @@ jobs:
 
       - name: Build Debug APK
         run: |
-          ./gradlew assembleDebug --stacktrace --no-daemon
+          ./gradlew assembleDebug --parallel --build-cache --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

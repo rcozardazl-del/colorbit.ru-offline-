@@ -81,6 +81,8 @@ import com.example.model.P2PListing
 import com.example.model.P2PSwarmState
 import com.example.model.PCComponent
 import com.example.model.VirtualLoan
+import com.example.ui.theme.ColorbitBorder
+import com.example.ui.theme.ColorbitCard
 import com.example.ui.theme.DarkCyberBorder
 import com.example.ui.theme.DarkCyberCard
 import com.example.ui.theme.DarkCyberCardElevated
@@ -142,8 +144,8 @@ fun ShopScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             ShopMarketTab.values().forEach { tab ->
                 val isSelected = selectedMarket == tab
@@ -157,22 +159,22 @@ fun ShopScreen(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(if (isSelected) tabColor.copy(alpha = 0.2f) else DarkCyberCard)
-                        .border(1.dp, if (isSelected) tabColor else DarkCyberBorder, RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (isSelected) tabColor.copy(alpha = 0.18f) else ColorbitCard)
+                        .border(1.dp, if (isSelected) tabColor else ColorbitBorder, RoundedCornerShape(8.dp))
                         .clickable { selectedMarket = tab }
-                        .padding(vertical = 10.dp),
+                        .padding(vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (tab == ShopMarketTab.AVINTO) {
                             Box(
                                 modifier = Modifier
-                                    .size(7.dp)
+                                    .size(6.dp)
                                     .clip(CircleShape)
                                     .background(if (p2pSwarm.isConnected) NeonGreen else HeatRed)
                             )
-                            Spacer(modifier = Modifier.width(5.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                         }
                         Text(
                             tab.title,
@@ -553,10 +555,10 @@ private fun P2PSwarmStatusHeader(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        colors = CardDefaults.cardColors(containerColor = DarkCyberCard),
-        shape = RoundedCornerShape(12.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, NeonOrange.copy(alpha = 0.5f))
+            .padding(horizontal = 14.dp, vertical = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = ColorbitCard),
+        shape = RoundedCornerShape(8.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, ColorbitBorder)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
@@ -567,7 +569,7 @@ private fun P2PSwarmStatusHeader(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(10.dp)
+                            .size(8.dp)
                             .clip(CircleShape)
                             .background(NeonGreen)
                     )
@@ -576,7 +578,7 @@ private fun P2PSwarmStatusHeader(
                         "P2P СЕТЬ АВИТО АКТИВНА",
                         color = NeonOrange,
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.Black,
+                        fontWeight = FontWeight.Bold,
                         letterSpacing = 0.5.sp
                     )
                 }
@@ -584,9 +586,9 @@ private fun P2PSwarmStatusHeader(
                 // Кнопка сканирования P2P сети
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(DarkCyberCardElevated)
-                        .border(1.dp, NeonOrange.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(Color(0xFF212121))
+                        .border(1.dp, ColorbitBorder, RoundedCornerShape(6.dp))
                         .clickable(enabled = !swarm.isScanning, onClick = onScan)
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
@@ -616,7 +618,7 @@ private fun P2PSwarmStatusHeader(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(DarkCyberCardElevated, RoundedCornerShape(8.dp))
+                    .background(Color(0xFF212121), RoundedCornerShape(6.dp))
                     .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -662,9 +664,9 @@ private fun P2PListingCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = DarkCyberCard),
-        border = androidx.compose.foundation.BorderStroke(1.dp, NeonOrange.copy(alpha = 0.4f))
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = ColorbitCard),
+        border = androidx.compose.foundation.BorderStroke(1.dp, ColorbitBorder)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             // Шапка пира-продавца
