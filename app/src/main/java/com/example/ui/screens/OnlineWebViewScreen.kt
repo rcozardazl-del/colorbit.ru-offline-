@@ -115,6 +115,7 @@ fun OnlineWebViewScreen(
             modifier = Modifier.fillMaxSize(),
             factory = { ctx ->
                 WebView(ctx).apply {
+                    setBackgroundColor(android.graphics.Color.parseColor("#121212"))
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT

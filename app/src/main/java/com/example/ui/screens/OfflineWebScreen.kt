@@ -3,13 +3,19 @@ package com.example.ui.screens
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.ViewGroup
+import android.webkit.JavascriptInterface
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -97,6 +103,37 @@ val OFFLINE_WEB_SHOPS = listOf(
     OfflineWebShop("Главная", "index", "file:///android_asset/web/index.html", "Главная страница")
 )
 
+class OfflineWebBridge(
+    private val context: Context,
+    private val onClose: () -> Unit,
+    private val onOpenAvito: () -> Unit
+) {
+    @JavascriptInterface
+    fun buyItem(name: String, price: Double, type: String) {
+        Handler(Looper.getMainLooper()).post {
+            Toast.makeText(
+                context,
+                "✓ Товар \"$name\" оформлен ($$price)!",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    @JavascriptInterface
+    fun openAvito() {
+        Handler(Looper.getMainLooper()).post {
+            onOpenAvito()
+        }
+    }
+
+    @JavascriptInterface
+    fun close() {
+        Handler(Looper.getMainLooper()).post {
+            onClose()
+        }
+    }
+}
+
 /**
  * Офлайн просмотр оригинального HTML + JavaScript кода Colorbit:
  * Открывает подлинные скачанные страницы магазинов, подгружает все скрипты Vue/Inertia,
@@ -116,111 +153,17 @@ fun OfflineWebScreen(
     var isLoading by remember { mutableStateOf(true) }
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(ColorbitBg)
             .testTag("offline_web_screen")
     ) {
-        // WebView с перехватом локальных ассетов
-        AndroidView(
-            modifier = Modifier.fillMaxSize(),
-            factory = { ctx ->
-                WebView(ctx).apply {
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-                    settings.apply {
-                        javaScriptEnabled = true
-                        domStorageEnabled = true
-                        allowFileAccess = true
-                        allowContentAccess = true
-                        allowFileAccessFromFileURLs = true
-                        allowUniversalAccessFromFileURLs = true
-                        useWideViewPort = true
-                        loadWithOverviewMode = true
-                        builtInZoomControls = true
-                        displayZoomControls = false
-                        cacheMode = WebSettings.LOAD_DEFAULT
-                    }
-
-                    webViewClient = object : WebViewClient() {
-                        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                            super.onPageStarted(view, url, favicon)
-                            isLoading = true
-                            if (url != null) {
-                                currentUrl = url
-                                val matched = OFFLINE_WEB_SHOPS.find { it.assetPath == url }
-                                if (matched != null) currentTitle = matched.name
-                            }
-                        }
-
-                        override fun onPageFinished(view: WebView?, url: String?) {
-                            super.onPageFinished(view, url)
-                            isLoading = false
-                            if (url != null) {
-                                currentUrl = url
-                            }
-                        }
-
-                        // Умный перехватчик: перенаправляет любые запросы на локальные скрипты, css и страницы
-                        override fun shouldInterceptRequest(
-                            view: WebView?,
-                            request: WebResourceRequest?
-                        ): WebResourceResponse? {
-                            val reqUrl = request?.url?.toString() ?: return null
-
-                            // 1. Если запрашивается внешний скрипт app / vendor / chunk
-                            if (reqUrl.contains("/build/assets/") || reqUrl.contains("/scripts/")) {
-                                val fileName = reqUrl.substringAfterLast("/").substringBefore("?")
-                                try {
-                                    val assetStream: InputStream = if (fileName.endsWith(".css")) {
-                                        ctx.assets.open("web/styles/$fileName")
-                                    } else {
-                                        ctx.assets.open("web/scripts/$fileName")
-                                    }
-                                    val mime = if (fileName.endsWith(".css")) "text/css" else "application/javascript"
-                                    return WebResourceResponse(mime, "UTF-8", assetStream)
-                                } catch (e: Exception) {
-                                    // Попробуем поискать в сохраненной папке пользователя
-                                    val userDir = ColorbitDownloader.getTargetDirectory(ctx)
-                                    val localF = if (fileName.endsWith(".css")) File(userDir, "styles/$fileName") else File(userDir, "scripts/$fileName")
-                                    if (localF.exists()) {
-                                        val mime = if (fileName.endsWith(".css")) "text/css" else "application/javascript"
-                                        return WebResourceResponse(mime, "UTF-8", localF.inputStream())
-                                    }
-                                }
-                            }
-
-                            // 2. Если запрашивается переход на colorbit.ru/shops/<slug>
-                            if (reqUrl.contains("colorbit.ru/shops/")) {
-                                val slug = reqUrl.substringAfter("colorbit.ru/shops/").substringBefore("?").substringBefore("/")
-                                if (slug.isNotEmpty()) {
-                                    try {
-                                        val assetStream = ctx.assets.open("web/shops/$slug.html")
-                                        return WebResourceResponse("text/html", "UTF-8", assetStream)
-                                    } catch (e: Exception) {
-                                        // fallback
-                                    }
-                                }
-                            }
-
-                            return super.shouldInterceptRequest(view, request)
-                        }
-                    }
-                    loadUrl(currentUrl)
-                    webViewInstance = this
-                }
-            }
-        )
-
         // Верхняя панель навигации по оригинальным магазинам и страницам HTML
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.TopCenter)
-                .background(Color(0xFF1E1E1E).copy(alpha = 0.96f))
+                .background(Color(0xFF1E1E1E))
                 .border(1.dp, ColorbitBorder)
                 .padding(horizontal = 10.dp, vertical = 6.dp)
         ) {
@@ -344,22 +287,141 @@ fun OfflineWebScreen(
             }
         }
 
-        // Загрузка страницы
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(ColorbitBg.copy(alpha = 0.35f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(color = NeonGreen, modifier = Modifier.size(32.dp))
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        "Загрузка HTML & JS сорцов...",
-                        color = TextSecondary,
-                        fontSize = 11.sp
-                    )
+        // Область WebView
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        ) {
+            AndroidView(
+                modifier = Modifier.fillMaxSize(),
+                factory = { ctx ->
+                    WebView(ctx).apply {
+                        setBackgroundColor(android.graphics.Color.parseColor("#121212"))
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                        settings.apply {
+                            javaScriptEnabled = true
+                            domStorageEnabled = true
+                            allowFileAccess = true
+                            allowContentAccess = true
+                            allowFileAccessFromFileURLs = true
+                            allowUniversalAccessFromFileURLs = true
+                            useWideViewPort = true
+                            loadWithOverviewMode = true
+                            builtInZoomControls = true
+                            displayZoomControls = false
+                            cacheMode = WebSettings.LOAD_DEFAULT
+                        }
+
+                        addJavascriptInterface(OfflineWebBridge(ctx, onClose, onOpenNativeAvito), "AndroidBridge")
+
+                        webChromeClient = object : WebChromeClient() {
+                            override fun onConsoleMessage(consoleMessage: android.webkit.ConsoleMessage?): Boolean {
+                                Log.d("ColorbitWeb", "${consoleMessage?.message()} -- line ${consoleMessage?.lineNumber()}")
+                                return super.onConsoleMessage(consoleMessage)
+                            }
+                        }
+
+                        webViewClient = object : WebViewClient() {
+                            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                                super.onPageStarted(view, url, favicon)
+                                isLoading = true
+                                if (url != null) {
+                                    currentUrl = url
+                                    val matched = OFFLINE_WEB_SHOPS.find { it.assetPath == url }
+                                    if (matched != null) currentTitle = matched.name
+                                }
+                            }
+
+                            override fun onPageFinished(view: WebView?, url: String?) {
+                                super.onPageFinished(view, url)
+                                isLoading = false
+                                if (url != null) {
+                                    currentUrl = url
+                                }
+                                view?.evaluateJavascript(
+                                    """
+                                    document.body.style.backgroundColor = '#121212';
+                                    document.body.style.color = '#FFFFFF';
+                                    if (typeof window.initRenderer === 'function') {
+                                        window.initRenderer();
+                                    }
+                                    """.trimIndent(),
+                                    null
+                                )
+                            }
+
+                            // Умный перехватчик: перенаправляет любые запросы на локальные скрипты, css и страницы
+                            override fun shouldInterceptRequest(
+                                view: WebView?,
+                                request: WebResourceRequest?
+                            ): WebResourceResponse? {
+                                val reqUrl = request?.url?.toString() ?: return null
+
+                                // 1. Если запрашивается внешний скрипт app / vendor / chunk или стили
+                                if (reqUrl.contains("/build/assets/") || reqUrl.contains("/scripts/") || reqUrl.contains("/styles/")) {
+                                    val fileName = reqUrl.substringAfterLast("/").substringBefore("?")
+                                    try {
+                                        val assetStream: InputStream = if (fileName.endsWith(".css")) {
+                                            ctx.assets.open("web/styles/$fileName")
+                                        } else {
+                                            ctx.assets.open("web/scripts/$fileName")
+                                        }
+                                        val mime = if (fileName.endsWith(".css")) "text/css" else "application/javascript"
+                                        return WebResourceResponse(mime, "UTF-8", assetStream)
+                                    } catch (e: Exception) {
+                                        // Попробуем поискать в сохраненной папке пользователя
+                                        val userDir = ColorbitDownloader.getTargetDirectory(ctx)
+                                        val localF = if (fileName.endsWith(".css")) File(userDir, "styles/$fileName") else File(userDir, "scripts/$fileName")
+                                        if (localF.exists()) {
+                                            val mime = if (fileName.endsWith(".css")) "text/css" else "application/javascript"
+                                            return WebResourceResponse(mime, "UTF-8", localF.inputStream())
+                                        }
+                                    }
+                                }
+
+                                // 2. Если запрашивается переход на colorbit.ru/shops/<slug>
+                                if (reqUrl.contains("colorbit.ru/shops/")) {
+                                    val slug = reqUrl.substringAfter("colorbit.ru/shops/").substringBefore("?").substringBefore("/")
+                                    if (slug.isNotEmpty()) {
+                                        try {
+                                            val assetStream = ctx.assets.open("web/shops/$slug.html")
+                                            return WebResourceResponse("text/html", "UTF-8", assetStream)
+                                        } catch (e: Exception) {
+                                            // fallback
+                                        }
+                                    }
+                                }
+
+                                return super.shouldInterceptRequest(view, request)
+                            }
+                        }
+                        loadUrl(currentUrl)
+                        webViewInstance = this
+                    }
+                }
+            )
+
+            // Загрузка страницы
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0x99121212)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator(color = NeonGreen, modifier = Modifier.size(32.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "Загрузка HTML & JS сорцов...",
+                            color = TextSecondary,
+                            fontSize = 11.sp
+                        )
+                    }
                 }
             }
         }
